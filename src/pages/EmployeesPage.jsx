@@ -1,66 +1,64 @@
-import React, { useState, useEffect } from "react";
-import { DataGrid } from '@mui/x-data-grid';
-
-const columns = [
-  { field: 'id', headerName: '№', width: 70 },
-  { field: 'first_name', headerName: 'Имя', width: 130 },
-  { field: 'last_name', headerName: 'Фамилия', width: 130 },
-  { field: 'email', headerName: 'Почта', sortable: false, type: 'number', width: 90 },
-  { field: 'phone', headerName: 'Телефон', sortable: false, type: 'number', width: 90 },
-  { field: 'account', headerName: 'Аккаунт', sortable: false, width: 160 },
-  { field: 'group', headerName: 'Отдел', sortable: false, width: 90 }
-];
-
-async function getData() {
-  const request = await fetch(`http://localhost:3001/data`);
-  const response = await request.json();
-  return response.data;
-}
+import React from "react";
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import { getData } from '../data/getData.js';
+import styles from './EmployeesPage.module.scss';
+import Table from "../components/Table.jsx";
+import Group from "../components/Group.jsx";
+import Cards from "../components/Cards.jsx";
+import { ClassNames } from "@emotion/react";
 
 export default function EmployeesPage() {
-  const [rows, setRows] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  useEffect(() => {
-    async function fetchRows() {
-      try {
-        const data = await getData();
-        const formattedRows = data.map(el => ({
-          id: el.id,
-          first_name: el.first_name,
-          last_name: el.last_name,
-          email: el.email,
-          phone: el.phone,
-          account: el.account,
-          group: el.group
-        }));
+  const [showTable, setShowTable] = React.useState(false);
+  const [showCards, setShowCards] = React.useState(false);
+  const [showGroup, setShowGroup] = React.useState(false);
 
-        setRows(formattedRows);
-        setIsLoading(false);
-      } catch (error) {
-        console.log(error);
-      }
+  React.useEffect(() => {
+    const Data = async () => {
+      setData(await getData());
+      setIsLoading(false);
     }
-    fetchRows();
+    Data();
   }, []);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const handleTable = () => {
+    setShowTable(!showTable);
+    setShowCards(false);
+    setShowGroup(false);
+  };
+
+  const handleCards = () => {
+    setShowCards(!showCards);
+    setShowTable(false);
+    setShowGroup(false);
+  };
+
+  const handleGroup = () => {
+    setShowGroup(!showGroup);
+    setShowTable(false);
+    setShowCards(false);
+  };
 
   return (
-    <div style={{ height: 400, width: '100%' }}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        initialState={{
-          pagination: {
-            paginationModel: { page: 0, pageSize: 50 },
-          },
-        }}
-        pageSizeOptions={[5, 10]}
-        checkboxSelection
-      />
+    <>
+    <div className={styles.buttons}>
+      <ButtonGroup variant="contained" aria-label="outlined primary button group" id={styles.Button}>
+        <Button onClick={handleTable}>Таблица</Button>
+        <Button onClick={handleCards}>Карточки</Button>
+        <Button onClick={handleGroup}>Группы</Button>
+      </ButtonGroup>
     </div>
-  );
+      
+      {isLoading ? (<p id={styles.loading}>Loading...</p>) : (
+        <>
+          {showTable && <Table data={data} />}
+          {showCards && <Cards />}
+          {showGroup && <Group />}
+        </>
+      )}
+    </>
+  )
 }

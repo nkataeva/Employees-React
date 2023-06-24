@@ -7,7 +7,7 @@ const AppBar = () => {
     return (
         <MuiAppBar component='nav'>
             <Toolbar>
-                <Typography variant="h5" component='div' sx={{ flexGrow: 1}}>
+                <Typography variant="h5" component='main' sx={{ flexGrow: 1}}>
                     Сотрудники
                 </Typography>
                 <IconButton size='large' color="inherit" onClick={() => navigate('/login')}>
